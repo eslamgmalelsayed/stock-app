@@ -1,5 +1,7 @@
 // Service Worker for heavy computational tasks and data processing
 
+declare const self: ServiceWorkerGlobalScope;
+
 const CACHE_NAME = 'stock-app-v1';
 const ASSETS_TO_CACHE = ['/', '/index.html'];
 
@@ -15,7 +17,7 @@ self.addEventListener('install', (event: ExtendableEvent) => {
       });
     }),
   );
-  (self as ServiceWorkerGlobalScope).skipWaiting();
+  self.skipWaiting();
 });
 
 // Activate event - clean up old caches
@@ -33,7 +35,7 @@ self.addEventListener('activate', (event: ExtendableEvent) => {
       );
     }),
   );
-  (self as ServiceWorkerGlobalScope).clients.claim();
+  self.clients.claim();
 });
 
 // Fetch event - serve from cache, fallback to network
