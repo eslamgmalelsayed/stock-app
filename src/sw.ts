@@ -51,7 +51,7 @@ self.addEventListener('fetch', (event: FetchEvent) => {
   }
 
   event.respondWith(
-    caches.match(event.request).then((response) => {
+    caches.match(event.request).then((response: Response | undefined) => {
       // Return cached response if available
       if (response) {
         return response;
@@ -89,6 +89,7 @@ self.addEventListener('fetch', (event: FetchEvent) => {
         .catch(() => {
           // Return offline page or fallback
           console.warn('Fetch failed for:', event.request.url);
+          return new Response('Offline', { status: 503 });
         });
     }),
   );
