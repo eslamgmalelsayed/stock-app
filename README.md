@@ -1,6 +1,6 @@
 # Stock App
 
-A modern stock market application built with React, TypeScript, and Vite. This project demonstrates a scalable architecture with a component-driven design system, state management preparation, and API integration ready for real-time stock data.
+A modern real-time stock price tracker built with React, TypeScript, and Vite. Displays live BTC/USD prices via WebSocket with Service Workers for offline support, Web Workers for background processing, and optimized performance (LCP: 0.69s).
 
 ## 🚀 Tech Stack
 
@@ -8,71 +8,96 @@ A modern stock market application built with React, TypeScript, and Vite. This p
 | ----------------- | --------------------------------------------------------- |
 | **Framework**     | React 19.2.0, React DOM 19.2.0                            |
 | **Build Tool**    | Vite (rolldown-vite 7.2.2) with HMR                       |
-| **Language**      | TypeScript 5.9.3                                          |
+| **Language**      | TypeScript 5.9.3 (strict mode)                            |
 | **Styling**       | Tailwind CSS 4.1.17 with CSS Variables                    |
 | **UI Components** | shadcn/ui (Radix UI primitives, Class Variance Authority) |
 | **Icons**         | Lucide React 0.553.0                                      |
+| **Real-time API** | TwelveData WebSocket (wss://ws.twelvedata.com/v1)         |
 | **Code Quality**  | ESLint 9.39.1, Prettier 3.6.2, TypeScript-ESLint 8.46.3   |
 | **Git Hooks**     | Husky 9.1.7 + lint-staged for pre-commit checks           |
+| **Deployment**    | Netlify with Service Worker support                       |
+
+## ✨ Key Features
+
+- **Real-time WebSocket** - Single connection for all 7 symbols (AAPL, TRP, QQQ, EUR/USD, USD/JPY, BTC/USD, ETH/BTC)
+- **Service Workers** - Network-first caching strategy with offline support
+- **Web Workers** - Heavy stock data processing off main thread
+- **Skeleton Loading** - Prevents layout shifts during data loading
+- **Font Preloading** - Optimized LCP (0.69s) with Google Fonts
+- **Pagination** - Navigate through symbols (3 per page)
+- **TypeScript Strict Mode** - Full type safety across codebase
 
 ## 📁 Project Structure
 
+```bash
 stock-app/
 ├── src/
 │ ├── components/
-│ │ ├── business/ # Domain-specific components (Pages, Features)
-│ │ │ └── (future: StockList, Portfolio, etc.)
-│ │ └── ui/ # Reusable UI components (Button, Input, etc.)
-│ │ └── button.tsx # Base button component with variants
-│ ├── hooks/ # Custom React hooks
-│ │ └── (future: useStockData, useCaching, etc.)
+│ │ ├── business/
+│ │ │ └── TradingView.tsx
+│ │ └── ui/
+│ │ ├── button.tsx
+│ │ ├── button.variants.ts
+│ │ ├── pagination.tsx
+│ │ └── skeleton.tsx
+│ ├── hooks/
+│ │ ├── useWebSocket.ts      # WebSocket lifecycle management
+│ │ ├── useWebWorker.ts      # Web Worker communication
+│ │ └── useServiceWorker.ts  # Service Worker tasks
+│ ├── workers/
+│ │ └── stockDataWorker.ts   # Background data processing
+│ ├── interfaces/
+│ │ └── index.ts             # TypeScript interfaces
 │ ├── lib/
-│ │ └── utils.ts # Utility functions (cn for Tailwind merging)
-│ ├── types/ # TypeScript type definitions
-│ │ └── (future: Stock, Portfolio, API types)
-│ ├── utils/ # Standalone utilities
-│ │ └── (future: Formatting, validation, etc.)
-│ ├── App.tsx # Root component
-│ ├── main.tsx # React entry point
-│ └── index.css # Global styles
-├── eslint.config.ts # ESLint flat config with Prettier integration
-├── .prettierrc.json # Prettier configuration (single quotes)
-├── vite.config.ts # Vite configuration with Tailwind plugin
-├── tsconfig.json # TypeScript configuration with @ path alias
-├── components.json # shadcn/ui configuration
+│ │ └── utils.ts
+│ ├── pages/
+│ │ └── Home.tsx
+│ ├── App.tsx
+│ ├── main.tsx
+│ ├── sw.ts                  # Service Worker (src/sw.ts)
+│ └── index.css
+├── public/
+│ └── sw.js                  # Built Service Worker
+├── netlify.toml             # Netlify deployment config
+├── vite.config.ts
+├── tsconfig.json
+├── eslint.config.ts
+├── components.json
 └── package.json
-
-### Data Flow Diagrams
-
-## 🎨 Design System
-
-This project uses a **component-driven design system** built on:
-
-1. **Radix UI**: Unstyled, accessible components as the foundation
-2. **Tailwind CSS**: Utility-first CSS with CSS variables for theming
-3. **shadcn/ui**: Copy-paste component library combining both
-4. **Class Variance Authority (CVA)**: Type-safe variant management
-
-## 🔄 Development Workflow
-
-### Code Quality
-
-Automated checks via Husky pre-commit hooks:
-
-```bash
-# Runs before commit:
-pnpm lint-staged  # ESLint + Prettier on staged files
 ```
 
-### Scripts
+## 🏗️ Architecture
 
-```bash
-# Development
-pnpm dev           # Start dev server with HMR
-pnpm build         # Build for production
-pnpm preview       # Preview production build
-pnpm lint          # Run ESLint on all files
-```
+### WebSocket Connection
+
+Single shared WebSocket subscribes to all symbols, avoiding multiple connections overhead.
+
+### Service Worker
+
+- **Install**: Caches essential assets (/, index.html)
+- **Fetch**: Network-first strategy with cache fallback
+- **Messages**: Handles background processing tasks
+
+### Web Worker
+
+- Processes stock data calculations (price changes, statistics)
+- Runs off main thread for better performance
+- Communicates via MessageChannel
+
+### Performance Optimizations
+
+- Memoized pagination calculations
+- useCallback for event handlers
+- Single Web Worker instance
+- Font preloading (Inter, weights 400-700)
+- Skeleton loading prevents layout shifts (CLS: 0)
+
+## 📊 Performance Metrics
+
+- **LCP (Largest Contentful Paint)**: 0.69s ✅ (Good)
+- **CLS (Cumulative Layout Shift)**: 0 (Skeleton prevents shifts)
+- **Service Worker Support**: ✅ Offline-ready
+- **Web Worker**: ✅ Background processing
 
 ## 🛠️ Getting Started
 
@@ -80,12 +105,49 @@ pnpm lint          # Run ESLint on all files
 # Install dependencies
 pnpm install
 
+# Add .env.local with API credentials
+echo 'VITE_BASE_URL=wss://ws.twelvedata.com/v1' > .env.local
+echo 'VITE_API_KEY=your_api_key_here' >> .env.local
+
 # Start development server
 pnpm dev
 
 # Build for production
 pnpm build
+
+# Deploy to Netlify
+netlify deploy
 ```
+
+## 📡 API Integration
+
+Uses TwelveData WebSocket API for real-time stock prices:
+
+```typescript
+// Subscribe to multiple symbols
+{
+  "action": "subscribe",
+  "params": {
+    "symbols": "AAPL,BTC/USD,EUR/USD"
+  }
+}
+```
+
+## 🚀 Deployment
+
+### Netlify
+
+```bash
+# One-click deployment
+netlify deploy
+```
+
+Configuration via `netlify.toml`:
+
+- Build: `pnpm run build`
+- Publish: `dist/`
+- SPA routing: All routes redirect to index.html
+- Cache headers: Service Worker never cached, assets 1-year cache
 
 ## 📚 Learn More
 
@@ -93,4 +155,6 @@ pnpm build
 - [Vite Documentation](https://vite.dev)
 - [Tailwind CSS](https://tailwindcss.com)
 - [shadcn/ui](https://ui.shadcn.com)
-- [Radix UI](https://www.radix-ui.com)
+- [Service Workers API](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API)
+- [Web Workers API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API)
+- [TwelveData API](https://twelvedata.com/docs)
