@@ -45,6 +45,14 @@ self.addEventListener('fetch', (event: FetchEvent) => {
     return;
   }
 
+  // Skip non-http(s) schemes (chrome-extension, file://, etc)
+  if (
+    !event.request.url.startsWith('http://') &&
+    !event.request.url.startsWith('https://')
+  ) {
+    return;
+  }
+
   // Skip WebSocket upgrade requests
   if (event.request.url.startsWith('wss://')) {
     return;

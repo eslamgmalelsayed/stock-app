@@ -1,5 +1,6 @@
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useWebWorker } from '@/hooks/useWebWorker';
+import { usePriceHistory } from '@/hooks/usePriceHistory';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Pagination,
@@ -10,6 +11,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Chart } from '@/components/business/Chart';
 
 export default function Home() {
   // Data
@@ -26,6 +28,9 @@ export default function Home() {
     Record<string, Record<string, unknown>>
   >({});
 
+  // Price History
+  const { history: priceHistory, addPrice } = usePriceHistory();
+
   // Web Worker
   const { send: sendToWorker } = useWebWorker();
 
@@ -36,10 +41,19 @@ export default function Home() {
       const eventType = (data as Record<string, unknown>).event as string;
       if (eventType !== 'subscribe') {
         const symbol = (data as Record<string, unknown>).symbol as string;
+        const price = ((data as Record<string, unknown>).price ||
+          (data as Record<string, unknown>).last) as number;
+
+        // Update stock data
         setStockDataMap((prev) => ({
           ...prev,
           [symbol]: data as Record<string, unknown>,
         }));
+
+        // Add to price history
+        if (price && symbol) {
+          addPrice(symbol, price);
+        }
       }
     },
     onError: (err) => {
@@ -128,12 +142,18 @@ export default function Home() {
             <h2 className='text-lg font-semibold text-gray-700 mb-2'>
               {(btcData.type as string) || (btcData.currency_base as string)}
             </h2>
-            <p className='text-5xl font-bold text-blue-600'>
+            <p className='text-5xl font-bold text-blue-600 mb-6'>
               $
               {((btcData.price as number) || (btcData.last as number))?.toFixed(
                 2,
               )}
             </p>
+            <div className='mt-6 pt-6 border-t border-gray-200'>
+              <h3 className='text-sm font-semibold text-gray-600 mb-4'>
+                Price Chart
+              </h3>
+              <Chart data={priceHistory} symbol='BTC/USD' height={200} />
+            </div>
           </div>
         )}
 
