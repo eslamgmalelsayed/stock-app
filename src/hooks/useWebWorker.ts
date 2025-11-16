@@ -1,17 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
-
-interface PendingCallback {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  resolve: (value: any) => void;
-  reject: (error: Error) => void;
-}
-
-interface WorkerMessage {
-  type: string;
-  data?: unknown;
-  error?: string;
-  success: boolean;
-}
+import type { PendingCallback, WorkerMessage } from '@/interfaces';
 
 export function useWebWorker() {
   const workerRef = useRef<Worker | null>(null);

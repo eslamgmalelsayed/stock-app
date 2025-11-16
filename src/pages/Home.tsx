@@ -70,9 +70,6 @@ export default function Home() {
     onClose: () => {
       console.log('WebSocket disconnected');
     },
-    reconnect: true,
-    reconnectInterval: 3000,
-    maxReconnectAttempts: 5,
   });
 
   // Subscribe on connection

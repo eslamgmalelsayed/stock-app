@@ -1,16 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-
-interface HistoryPoint {
-  timestamp: number;
-  price: number;
-  symbol: string;
-}
-
-interface UsePriceHistoryReturn {
-  history: HistoryPoint[];
-  addPrice: (symbol: string, price: number) => void;
-  clearHistory: () => void;
-}
+import type { HistoryPoint, UsePriceHistoryReturn } from '@/interfaces';
 
 const MAX_HISTORY_POINTS = 60;
 const HISTORY_INTERVAL = 1000;

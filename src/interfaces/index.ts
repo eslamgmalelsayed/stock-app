@@ -32,9 +32,38 @@ interface ProcessedStockData extends StockData {
   spread: number;
 }
 
+interface PendingCallback {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  resolve: (value: any) => void;
+  reject: (error: Error) => void;
+}
+
+interface WorkerMessage {
+  type: string;
+  data?: unknown;
+  error?: string;
+  success: boolean;
+}
+
+interface HistoryPoint {
+  timestamp: number;
+  price: number;
+  symbol: string;
+}
+
+interface UsePriceHistoryReturn {
+  history: HistoryPoint[];
+  addPrice: (symbol: string, price: number) => void;
+  clearHistory: () => void;
+}
+
 export type {
   UseWebSocketOptions,
   UseWebSocketReturn,
   StockData,
   ProcessedStockData,
+  PendingCallback,
+  WorkerMessage,
+  HistoryPoint,
+  UsePriceHistoryReturn,
 };
