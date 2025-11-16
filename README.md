@@ -2,6 +2,9 @@
 
 A modern real-time stock price tracker built with React, TypeScript, and Vite. Displays live BTC/USD prices via WebSocket with Service Workers for offline support, Web Workers for background processing, and optimized performance (LCP: 0.69s).
 
+## 🚀 Demo
+https://stock-appp.netlify.app/
+
 ## 🚀 Tech Stack
 
 | Category          | Technology                                                |
